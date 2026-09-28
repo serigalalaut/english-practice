@@ -1,5 +1,4 @@
-import { verbs } from './verbs'
-import { grammarQuestions } from './grammarQuestions'
+import { getAllVerbs, getAllGrammarQuestions } from './sqliteClient'
 import { generateTemplateQuestions } from './grammarTemplates'
 
 function shuffle(array) {
@@ -58,9 +57,12 @@ const DIRECTIONS = [
   { from: 'v3', to: 'v1', fromLabel: 'V3 (past participle)', toLabel: 'V1 (base)' },
 ]
 
-// Generates `count` verb quiz questions. Verbs don't repeat within a quiz,
-// and won't repeat across quizzes/retries until the whole verb list has appeared.
-export function generateVerbQuiz(count = 20) {
+// Generates `count` verb quiz questions, reading the verb bank from the
+// SQLite database (public/data/quiz.db, loaded via sql.js in the browser).
+// Verbs don't repeat within a quiz, and won't repeat across quizzes/retries
+// until the whole verb list has appeared.
+export async function generateVerbQuiz(count = 20) {
+  const verbs = await getAllVerbs()
   const n = Math.min(count, verbs.length)
   const indices = drawWithoutRepeat('verbQuizPool', verbs.length, n)
   const chosenVerbs = indices.map((i) => verbs[i])
@@ -111,12 +113,14 @@ function pushHistory(storageKey, newTexts, cap) {
   }
 }
 
-// Generates `count` grammar quiz questions, mixing curated hand-written
-// questions (no-repeat pool, like verbs) with template-generated ones
-// (randomized subject/verb/object/time combinations - thousands of
-// practical variations, tracked via a recent-history list so the same
-// generated sentence rarely appears again soon).
-export function generateGrammarQuiz(count = 20) {
+// Generates `count` grammar quiz questions, mixing curated questions read
+// from the SQLite database (no-repeat pool, like verbs) with
+// template-generated ones (randomized subject/verb/object/time
+// combinations - thousands of practical variations, tracked via a
+// recent-history list so the same generated sentence rarely appears
+// again soon).
+export async function generateGrammarQuiz(count = 20) {
+  const grammarQuestions = await getAllGrammarQuestions()
   const curatedCount = Math.min(Math.ceil(count / 2), grammarQuestions.length)
   const templateCount = count - curatedCount
 

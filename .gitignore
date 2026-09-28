@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Generated at build time by scripts/build-db.mjs (see package.json prebuild)
+public/data/quiz.db
+public/sql-wasm-browser.wasm
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

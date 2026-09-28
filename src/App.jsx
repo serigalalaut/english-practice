@@ -11,16 +11,24 @@ const QUIZ_TITLES = {
 }
 
 function App() {
-  const [screen, setScreen] = useState('home') // home | quiz | result
+  const [screen, setScreen] = useState('home') // home | loading | quiz | result
   const [quizType, setQuizType] = useState(null)
   const [questions, setQuestions] = useState([])
   const [answers, setAnswers] = useState([])
+  const [loadError, setLoadError] = useState(null)
 
-  function startQuiz(type) {
-    const generated = type === 'verb' ? generateVerbQuiz(20) : generateGrammarQuiz(20)
+  async function startQuiz(type) {
     setQuizType(type)
-    setQuestions(generated)
-    setScreen('quiz')
+    setScreen('loading')
+    setLoadError(null)
+    try {
+      const generated = type === 'verb' ? await generateVerbQuiz(20) : await generateGrammarQuiz(20)
+      setQuestions(generated)
+      setScreen('quiz')
+    } catch {
+      setLoadError('Gagal memuat soal. Coba muat ulang halaman.')
+      setScreen('home')
+    }
   }
 
   function finishQuiz(finalAnswers) {
@@ -41,7 +49,13 @@ function App() {
 
   return (
     <div className="app">
-      {screen === 'home' && <Home onStart={startQuiz} />}
+      {screen === 'home' && <Home onStart={startQuiz} error={loadError} />}
+      {screen === 'loading' && (
+        <div className="screen loading">
+          <div className="spinner" />
+          <p>Menyiapkan soal...</p>
+        </div>
+      )}
       {screen === 'quiz' && (
         <Quiz
           questions={questions}

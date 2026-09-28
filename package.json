@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "build:db": "node scripts/build-db.mjs",
+    "predev": "npm run build:db",
+    "prebuild": "npm run build:db",
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
@@ -11,7 +14,8 @@
   },
   "dependencies": {
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "sql.js": "^1.14.2"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",

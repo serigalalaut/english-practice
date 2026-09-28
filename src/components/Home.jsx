@@ -1,9 +1,10 @@
-function Home({ onStart }) {
+function Home({ onStart, error }) {
   return (
     <div className="screen home">
       <span className="eyebrow">✨ English Practice</span>
       <h1>Verb &amp; Grammar Quiz</h1>
       <p className="subtitle">Belajar Verb 1, Verb 2, Verb 3, dan Grammar Bahasa Inggris</p>
+      {error && <p className="error-banner">{error}</p>}
 
       <div className="card-grid">
         <div className="quiz-card">
