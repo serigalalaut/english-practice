@@ -159,6 +159,29 @@ const COLLOCATIONS = [
   { phrase: 'worried', prep: 'about', objects: ['the exam', 'the future', 'the weather', 'the deadline'] },
 ]
 
+const MODALS = [
+  { modal: 'can', meaning: 'kemampuan', context: ['swim very well', 'speak three languages', 'play the piano', 'solve this puzzle'] },
+  { modal: 'must', meaning: 'keharusan', context: ['wear a helmet', 'submit the report by Friday', 'follow the rules', 'pay the bill'] },
+  { modal: 'should', meaning: 'saran', context: ['see a doctor', 'apologize to her', 'save more money', 'exercise regularly'] },
+  { modal: 'may', meaning: 'izin', context: ['leave early today', 'ask a question', 'borrow your pen', 'use the restroom'] },
+]
+
+const VOWEL_SOUND_NOUNS = ['apple', 'orange', 'umbrella', 'hour', 'idea', 'elephant', 'egg']
+const CONSONANT_SOUND_NOUNS = ['car', 'book', 'university', 'European country', 'dog', 'one-eyed monster']
+
+const REPORTED_STATEMENTS = [
+  { direct: 'I am tired', answer: 'was tired', distractors: ['am tired', 'have been tired', 'will be tired'] },
+  { direct: 'I like coffee', answer: 'liked coffee', distractors: ['like coffee', 'have liked coffee', 'will like coffee'] },
+  { direct: 'I am watching TV', answer: 'was watching TV', distractors: ['am watching TV', 'watched TV', 'will watch TV'] },
+  { direct: 'I have finished the work', answer: 'had finished the work', distractors: ['have finished the work', 'finished the work', 'will finish the work'] },
+  { direct: 'I will come tomorrow', answer: 'would come the next day', distractors: ['will come tomorrow', 'came tomorrow', 'come tomorrow'] },
+  { direct: 'I can help you', answer: 'could help me', distractors: ['can help me', 'helped me', 'will help me'] },
+]
+
+const GERUND_VERBS = ['enjoy', 'avoid', 'finish', 'suggest', 'deny', 'practice', 'consider']
+const INFINITIVE_VERBS = ['decide', 'want', 'promise', 'plan', 'manage', 'agree', 'hope']
+const NO_S_SUBJECTS = ['I', 'You', 'We', 'They']
+
 function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)]
 }
@@ -371,6 +394,66 @@ const TEMPLATES = [
       options: [...new Set(options)].slice(0, 4),
       answer: correctTag,
       explanation: `Pola question tag: kalimat utama ${isNegative ? 'NEGATIF' : 'POSITIF'} dipasangkan dengan tag ${isNegative ? 'POSITIF' : 'NEGATIF'}, memakai auxiliary yang sama ("${tagAux}") dengan subjek yang sama ("${subj.text.toLowerCase()}"): "${correctTag}".\nContoh lain: ${subj.text} ${isNegative ? presentSimple(subj, verb) : `${tagAux === 'does' ? "doesn't" : "don't"} ${verb.base}`} ${obj}, ${isNegative ? wrongTag1.replace(subj.text.toLowerCase(), subj.text.toLowerCase()) : correctTag}?`,
+    }
+  },
+
+  // Modal verbs: ability / obligation / advice / permission
+  function tModal() {
+    const subj = pick(SUBJECTS)
+    const m = pick(MODALS)
+    const ctx = pick(m.context)
+    const wrongModals = shuffle(['can', 'must', 'should', 'may', 'will'].filter((x) => x !== m.modal)).slice(0, 3)
+    const options = buildOptions(m.modal, wrongModals)
+    return {
+      q: `${subj.text} ${'___'} ${ctx}.`,
+      options,
+      answer: m.modal,
+      explanation: `Modal "${m.modal}" dipakai untuk menyatakan ${m.meaning}, bukan makna modal lain seperti kemampuan/keharusan/saran/izin yang berbeda-beda.\nContoh lain: ${pick(SUBJECTS).text} ${m.modal} ${pick(m.context)}.`,
+    }
+  },
+
+  // Article a / an, based on the SOUND that follows, not the letter
+  function tArticle() {
+    const useVowelSound = Math.random() < 0.5
+    const noun = useVowelSound ? pick(VOWEL_SOUND_NOUNS) : pick(CONSONANT_SOUND_NOUNS)
+    const correct = useVowelSound ? 'an' : 'a'
+    const options = buildOptions(correct, [useVowelSound ? 'a' : 'an', 'the', 'some'])
+    return {
+      q: `I saw ${'___'} ${noun} yesterday.`,
+      options,
+      answer: correct,
+      explanation: `Artikel "an" dipakai bila kata berikutnya diawali BUNYI vokal, dan "a" bila diawali BUNYI konsonan — bukan berdasar huruf pertamanya saja.\n"${noun}" diawali bunyi ${useVowelSound ? 'vokal' : 'konsonan'}, sehingga dipakai "${correct}".\nContoh jebakan umum: "a university" (bunyi "yu", konsonan) dan "an hour" (huruf h tapi bunyi vokal, "h"-nya tidak dibaca).`,
+    }
+  },
+
+  // Reported speech: direct statement backshifted into indirect speech
+  function tReportedSpeech() {
+    const s = pick(REPORTED_STATEMENTS)
+    const subj = pick(['He', 'She'])
+    const options = buildOptions(s.answer, s.distractors)
+    return {
+      q: `${subj} said, "${s.direct}." → ${subj} said (that) ${subj === 'He' ? 'he' : 'she'} ${'___'}.`,
+      options,
+      answer: s.answer,
+      explanation: `Pola: Reported Speech — tense pada ucapan langsung mundur satu tingkat (backshift) saat dilaporkan sebagai ucapan tidak langsung.\nUcapan asli "${s.direct}" menjadi "...${s.answer}" ketika dilaporkan.\nContoh lain: Direct: "I am hungry." → Reported: She said she was hungry.`,
+    }
+  },
+
+  // Gerund vs to-infinitive after specific verbs
+  function tGerundInfinitive() {
+    const subj = pick(NO_S_SUBJECTS)
+    const useGerund = Math.random() < 0.5
+    const mainVerb = useGerund ? pick(GERUND_VERBS) : pick(INFINITIVE_VERBS)
+    const actionVerb = pick(REGULAR_VERBS)
+    const obj = pick(OBJECTS)
+    const correct = useGerund ? actionVerb.ing : `to ${actionVerb.base}`
+    const wrong = useGerund ? `to ${actionVerb.base}` : actionVerb.ing
+    const options = buildOptions(correct, [wrong, actionVerb.base, actionVerb.ed])
+    return {
+      q: `${subj} ${mainVerb} ${'___'} ${obj}.`,
+      options,
+      answer: correct,
+      explanation: `"${mainVerb}" termasuk kelompok kata kerja yang SELALU diikuti ${useGerund ? 'gerund (V-ing)' : 'to-infinitive'}, tidak pernah ${useGerund ? 'to-infinitive' : 'gerund'}. Pola ini harus dihafal per kata kerja.\nContoh lain: ${pick(NO_S_SUBJECTS)} ${mainVerb} ${correct} ${pick(OBJECTS)}.`,
     }
   },
 ]
