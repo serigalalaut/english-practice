@@ -10,7 +10,7 @@ function Home({ onStart, error }) {
         <div className="quiz-card">
           <div className="card-icon">🔤</div>
           <h2>Verb Forms</h2>
-          <p>Tebak bentuk V1 / V2 / V3 dari kata kerja tidak beraturan.</p>
+          <p>Tebak bentuk V1 / V2 / V3 dari kata kerja beraturan dan tidak beraturan.</p>
           <div className="card-meta">
             <span className="pill">20 soal</span>
             <span className="pill">Tanpa pengulangan</span>
