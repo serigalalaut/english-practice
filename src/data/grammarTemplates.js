@@ -116,6 +116,13 @@ const OBJECTS = [
   'the house', 'a letter', 'the car', 'dinner', 'the report',
   'the room', 'a song', 'the garden', 'the windows', 'breakfast',
   'the project', 'the document', 'the photo', 'the file', 'the package',
+  'the invoice', 'the presentation', 'the design', 'the budget', 'the contract',
+  'the schedule', 'the ticket', 'the parcel', 'the message', 'the recipe',
+  'the essay', 'the exam', 'the form', 'the request', 'the order',
+  'the account', 'the certificate', 'the map', 'the poster', 'the invitation',
+  'the receipt', 'the manual', 'the survey', 'the album', 'the painting',
+  'the machine', 'the engine', 'the bridge', 'the road', 'the fence',
+  'the roof', 'the wall', 'the ceiling', 'the floor', 'the pipe',
 ]
 
 const HABITUAL_TIME = ['every day', 'every morning', 'every week', 'on weekends', 'usually']
