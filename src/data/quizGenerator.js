@@ -1,5 +1,6 @@
 import { verbs } from './verbs'
 import { grammarQuestions } from './grammarQuestions'
+import { generateTemplateQuestions } from './grammarTemplates'
 
 function shuffle(array) {
   const a = [...array]
@@ -87,19 +88,58 @@ export function generateVerbQuiz(count = 20) {
   })
 }
 
-// Generates `count` grammar quiz questions. Questions don't repeat within a
-// quiz, and won't repeat across quizzes/retries until the whole bank has appeared.
-export function generateGrammarQuiz(count = 20) {
-  const n = Math.min(count, grammarQuestions.length)
-  const indices = drawWithoutRepeat('grammarQuizPool', grammarQuestions.length, n)
-  const chosen = indices.map((i) => grammarQuestions[i])
+const TEMPLATE_HISTORY_KEY = 'grammarTemplateHistory'
+const TEMPLATE_HISTORY_CAP = 400
 
-  return chosen.map((item, idx) => ({
-    id: `grammar-${idx}`,
+function readHistorySet(storageKey) {
+  try {
+    const raw = localStorage.getItem(storageKey)
+    const list = raw ? JSON.parse(raw) : []
+    return new Set(Array.isArray(list) ? list : [])
+  } catch {
+    return new Set()
+  }
+}
+
+function pushHistory(storageKey, newTexts, cap) {
+  try {
+    const existing = [...readHistorySet(storageKey)]
+    const updated = [...existing, ...newTexts].slice(-cap)
+    localStorage.setItem(storageKey, JSON.stringify(updated))
+  } catch {
+    // ignore storage errors (private mode, quota, etc.)
+  }
+}
+
+// Generates `count` grammar quiz questions, mixing curated hand-written
+// questions (no-repeat pool, like verbs) with template-generated ones
+// (randomized subject/verb/object/time combinations - thousands of
+// practical variations, tracked via a recent-history list so the same
+// generated sentence rarely appears again soon).
+export function generateGrammarQuiz(count = 20) {
+  const curatedCount = Math.min(Math.ceil(count / 2), grammarQuestions.length)
+  const templateCount = count - curatedCount
+
+  const curatedIndices = drawWithoutRepeat('grammarQuizPool', grammarQuestions.length, curatedCount)
+  const curated = curatedIndices.map((i) => ({
+    question: grammarQuestions[i].q,
+    options: shuffle(grammarQuestions[i].options),
+    answer: grammarQuestions[i].answer,
+    explanation: grammarQuestions[i].explanation,
+  }))
+
+  const avoid = readHistorySet(TEMPLATE_HISTORY_KEY)
+  const generated = generateTemplateQuestions(templateCount, avoid).map((item) => ({
     question: item.q,
-    subtitle: null,
     options: shuffle(item.options),
     answer: item.answer,
     explanation: item.explanation,
+  }))
+  pushHistory(TEMPLATE_HISTORY_KEY, generated.map((g) => g.question), TEMPLATE_HISTORY_CAP)
+
+  return shuffle([...curated, ...generated]).map((q, idx) => ({
+    id: `grammar-${idx}`,
+    subtitle: null,
+    ...q,
   }))
 }
