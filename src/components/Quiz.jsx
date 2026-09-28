@@ -25,6 +25,7 @@ function Quiz({ questions, quizTitle, onFinish, onExit }) {
         subtitle: question.subtitle,
         selected,
         correctAnswer: question.answer,
+        explanation: question.explanation,
         isCorrect,
       },
     ]
@@ -81,6 +82,10 @@ function Quiz({ questions, quizTitle, onFinish, onExit }) {
             )
           })}
         </div>
+
+        {locked && question.explanation && (
+          <p className="explanation">💡 {question.explanation}</p>
+        )}
 
         <button className="btn primary next-btn" onClick={handleNext} disabled={!locked}>
           {current + 1 < total ? 'Berikutnya' : 'Lihat Hasil'}

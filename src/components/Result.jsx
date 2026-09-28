@@ -77,6 +77,7 @@ function Result({ answers, quizTitle, onRetry, onHome }) {
                   </>
                 )}
               </div>
+              {a.explanation && <div className="review-explanation">💡 {a.explanation}</div>}
             </div>
           </div>
         ))}

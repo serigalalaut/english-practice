@@ -43,6 +43,7 @@ export function generateVerbQuiz(count = 20) {
       subtitle: verb.meaning,
       options,
       answer: correctAnswer,
+      explanation: null,
     }
   })
 }
@@ -56,5 +57,6 @@ export function generateGrammarQuiz(count = 20) {
     subtitle: null,
     options: shuffle(item.options),
     answer: item.answer,
+    explanation: item.explanation,
   }))
 }
