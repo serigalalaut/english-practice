@@ -1,5 +1,6 @@
 import { getAllVerbs, getAllGrammarQuestions } from './sqliteClient'
 import { generateTemplateQuestions } from './grammarTemplates'
+import { explainVerb } from './verbExplanation'
 
 function shuffle(array) {
   const a = [...array]
@@ -85,7 +86,7 @@ export async function generateVerbQuiz(count = 20) {
       subtitle: verb.meaning,
       options,
       answer: correctAnswer,
-      explanation: null,
+      explanation: explainVerb(verb),
     }
   })
 }
